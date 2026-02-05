@@ -83,10 +83,14 @@ def play_knucklebones(player0: Player, player1: Player) -> None:
         if turn == 0:
             row = player0.play(dice, board.copy(0))
             board.side_0[row].append(dice)
+            while dice in board.side_1[row]:
+                board.side_1[row].remove(dice)
             turn = 1
         else:
             row = player1.play(dice, board.copy(1))
             board.side_1[row].append(dice)
+            while dice in board.side_0[row]:
+                board.side_0[row].remove(dice)
             turn = 0
 
     # Game Over
