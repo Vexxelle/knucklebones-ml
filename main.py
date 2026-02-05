@@ -99,6 +99,50 @@ class Random_Player(Player):
         valid_rows = [i for i in range(3) if len(board.side_0[i]) < 3]
         return cast(Literal[0,1,2], choice(valid_rows))
 
+class Sequential_Player(Player):
+    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+        for i in range(3):
+            if len(board.side_0[i]) < 3:
+                return cast(Literal[0,1,2], i)
+        return 0  # Fallback, should never reach here
+
+class Aggressive_Player(Player):
+    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+        # Look for a row to place the dice that would remove the most opponent dice
+        best_row = 0
+        most_removed = 0
+        for i, row in enumerate(board.side_1):
+            if len(row) < 3:
+                if row.count(dice) > most_removed:
+                    best_row = i
+                    most_removed = row.count(dice)
+        
+        if most_removed == 0:
+            # If no dice can be removed, just place in the first available row
+            for i in range(3):
+                if len(board.side_0[i]) < 3:
+                    return cast(Literal[0,1,2], i)
+        return cast(Literal[0,1,2], best_row)
+    
+class Smart_Player(Player):
+    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+        def rel_score(board: Board) -> int:
+            return board.evaluate_score(0) - board.evaluate_score(1)
+
+        best_row = -1
+        best_score = float('-inf')
+        for i in range(3):
+            temp_board = board.copy(0)
+            temp_board.place_die(0, i, dice)
+            if rel_score(temp_board) >= best_score:
+                best_row = i
+                best_score = rel_score(temp_board)
+
+        return cast(Literal[0,1,2], best_row)
+    
+
+
+
 def play_knucklebones(player0: Player, player1: Player, ui: bool = False) -> tuple[int, int]:
     # Initialize Game
     if ui:
