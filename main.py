@@ -81,9 +81,16 @@ class Human_Player(Player):
             except ValueError:
                 print("Invalid input. Please enter a number.")
 
-def play_knucklebones(player0: Player, player1: Player) -> None:
+def play_knucklebones(player0: Player, player1: Player, ui: bool = False) -> tuple[int, int]:
+    # Initialize Game
+    if ui:
+        print("Welcome to Knucklebones!")
+        print(f"Player 1: {player0.name}")
+        print(f"Player 2: {player1.name}")
+        print("Let's begin!\n")
     board = Board()
     turn = randint(0, 1)
+    
     # Game Loop
     while not board.is_full():
         dice = randint(1, 6)
@@ -100,19 +107,24 @@ def play_knucklebones(player0: Player, player1: Player) -> None:
                 board.side_0[row].remove(dice)
             turn = 0
 
-    # Game Over
-    board.print_board()
     score_0 = board.evaluate_score(0)
     score_1 = board.evaluate_score(1)
-    print("\nGame Over!")
-    if score_0 > score_1:
-        print(f"{player0.name} wins with a score of {score_0} against {score_1}!")
-    elif score_1 > score_0:
-        print(f"{player1.name} wins with a score of {score_1} against {score_0}!")
-    else:
-        print(f"It's a tie! Both players scored {score_0}!")
 
-    print("Thanks for playing!")
+    # Game Over
+    if ui:
+        board.print_board()
+
+        print("\nGame Over!")
+        if score_0 > score_1:
+            print(f"{player0.name} wins with a score of {score_0} against {score_1}!")
+        elif score_1 > score_0:
+            print(f"{player1.name} wins with a score of {score_1} against {score_0}!")
+        else:
+            print(f"It's a tie! Both players scored {score_0}!")
+
+        print("Thanks for playing!")
+    
+    return score_0, score_1
 
 
 
