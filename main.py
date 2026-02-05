@@ -54,11 +54,18 @@ class Player:
 
 class Human_Player(Player):
     def play(self, dice: int, board: Board) -> Literal[0,1,2]:
-        print("\n"*2 + f"{self.name}, it's your turn! You rolled a {dice}.")
+        
+        dice_art = f'''
+            -----
+            | {dice} |
+            -----'''.center(40)
+        print("\n"*2 + f"{self.name}, it's your turn! You rolled a:" + dice_art)
+        
+
         board.print_board()
         while True:
             try:
-                row = int(input("Select a row to place your die (0, 1, or 2): "))
+                row = int(input("Select a row to place your dice (0, 1, or 2): "))
                 if row not in [0, 1, 2]:
                     print("Invalid row. Please select 0, 1, or 2.")
                     continue
@@ -94,6 +101,18 @@ def play_knucklebones(player0: Player, player1: Player) -> None:
             turn = 0
 
     # Game Over
+    board.print_board()
+    score_0 = board.evaluate_score(0)
+    score_1 = board.evaluate_score(1)
+    print("\nGame Over!")
+    if score_0 > score_1:
+        print(f"{player0.name} wins with a score of {score_0} against {score_1}!")
+    elif score_1 > score_0:
+        print(f"{player1.name} wins with a score of {score_1} against {score_0}!")
+    else:
+        print(f"It's a tie! Both players scored {score_0}!")
+
+    print("Thanks for playing!")
 
 
 
