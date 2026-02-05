@@ -34,7 +34,7 @@ class Board:
     def print_board(self) -> None:
         print(f"Player 1 Side ({self.evaluate_score(0)}):" + " "*12 + f"Player 2 Side ({self.evaluate_score(1)}):")
         for i in range(3):
-            print("Row " + str(i) + ": ", end="")
+            print("Row " + str(i+1) + ": ", end="")
             print(str(self.side_0[i]).center(10), end="    ")
             print(str(self.side_1[i]).center(10))
         
@@ -65,9 +65,9 @@ class Human_Player(Player):
         board.print_board()
         while True:
             try:
-                row = int(input("Select a row to place your dice (0, 1, or 2): "))
+                row = int(input("Select a row to place your dice (1, 2, or 3): "))-1
                 if row not in [0, 1, 2]:
-                    print("Invalid row. Please select 0, 1, or 2.")
+                    print("Invalid row. Please select 1, 2, or 3.")
                     continue
                 if len(board.side_0[row]) >= 3:
                     print("That row is full. Please select a different row.")
@@ -133,8 +133,11 @@ def play_knucklebones(player0: Player, player1: Player, ui: bool = False) -> tup
 def main():
     print("Hello from knucklebones-ml!")
     p_0 = Human_Player(input("Player 1 Name: "))
-    p_1 = Human_Player(input("Player 2 Name: "))
-    play_knucklebones(p_0, p_1)
+    if bool(input("Play against a bot? (y/n): ").lower() == 'y'):
+        p_1 = Random_Player("Bot")
+    else:
+        p_1 = Human_Player(input("Player 2 Name: "))
+    play_knucklebones(p_0, p_1, ui=True)
 
 
 if __name__ == "__main__":
