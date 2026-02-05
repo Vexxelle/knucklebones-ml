@@ -1,5 +1,5 @@
-from random import randint
-from typing import Literal
+from random import randint, choice
+from typing import Literal, cast
 
 
 class Board:
@@ -72,14 +72,16 @@ class Human_Player(Player):
                 if len(board.side_0[row]) >= 3:
                     print("That row is full. Please select a different row.")
                     continue
-                match row:
-                    case 0: return 0
-                    case 1: return 1
-                    case 2: return 2
-                    case _: raise ValueError(f"Player {self.name} selected invalid row. Selected Value: {row}, valid rows: 0,1,2.")
+                
+                return cast(Literal[0,1,2], row)
                 
             except ValueError:
                 print("Invalid input. Please enter a number.")
+
+class Random_Player(Player):
+    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+        valid_rows = [i for i in range(3) if len(board.side_0[i]) < 3]
+        return cast(Literal[0,1,2], choice(valid_rows))
 
 def play_knucklebones(player0: Player, player1: Player, ui: bool = False) -> tuple[int, int]:
     # Initialize Game
@@ -90,7 +92,7 @@ def play_knucklebones(player0: Player, player1: Player, ui: bool = False) -> tup
         print("Let's begin!\n")
     board = Board()
     turn = randint(0, 1)
-    
+
     # Game Loop
     while not board.is_full():
         dice = randint(1, 6)
