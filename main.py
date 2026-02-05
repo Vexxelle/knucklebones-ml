@@ -7,6 +7,22 @@ class Board:
         self.side_0 = side_0
         self.side_1 = side_1
 
+    def place_die(self, side: Literal[0,1], row: int, die: int) -> bool:
+        if side == 0:
+            if len(self.side_0[row]) < 3:
+                self.side_0[row].append(die)
+                while die in self.side_1[row]:
+                    self.side_1[row].remove(die)
+                return True
+        else:
+            if len(self.side_1[row]) < 3:
+                self.side_1[row].append(die)
+                while die in self.side_0[row]:
+                    self.side_0[row].remove(die)
+                return True
+        return False
+
+
     def evaluate_score(self, side: Literal[0,1]) -> int:
         score = 0
         if side == 0:
@@ -98,15 +114,13 @@ def play_knucklebones(player0: Player, player1: Player, ui: bool = False) -> tup
         dice = randint(1, 6)
         if turn == 0:
             row = player0.play(dice, board.copy(0))
-            board.side_0[row].append(dice)
-            while dice in board.side_1[row]:
-                board.side_1[row].remove(dice)
+            if not board.place_die(0, row, dice):
+                raise ValueError(f"Invalid move by {player0.name} on row {row+1} with die {dice}.")
             turn = 1
         else:
             row = player1.play(dice, board.copy(1))
-            board.side_1[row].append(dice)
-            while dice in board.side_0[row]:
-                board.side_0[row].remove(dice)
+            if not board.place_die(0, row, dice):
+                raise ValueError(f"Invalid move by {player1.name} on row {row+1} with die {dice}.")
             turn = 0
 
     score_0 = board.evaluate_score(0)
@@ -114,6 +128,7 @@ def play_knucklebones(player0: Player, player1: Player, ui: bool = False) -> tup
 
     # Game Over
     if ui:
+        print("\n\nFinal Board State:")
         board.print_board()
 
         print("\nGame Over!")
