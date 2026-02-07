@@ -59,9 +59,13 @@ class Board:
 
     def copy(self, primary_side: Literal[0,1] = 0) -> "Board":
         if primary_side == 0:
-            return Board(self.side_0.copy(), self.side_1.copy())
+            side_0_copy = [row.copy() for row in self.side_0]
+            side_1_copy = [row.copy() for row in self.side_1]
+            return Board(side_0_copy, side_1_copy)
         else:
-            return Board(self.side_1.copy(), self.side_0.copy())
+            side_0_copy = [row.copy() for row in self.side_0]
+            side_1_copy = [row.copy() for row in self.side_1]
+            return Board(side_1_copy, side_0_copy)
         
 class Player:
     def __init__(self, name: str): 
