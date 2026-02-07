@@ -151,6 +151,16 @@ class Smart_Player(Player):
 
         return cast(Literal[0,1,2], best_row)
     
+class Combo_Player(Player):
+    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
+        for idx,row in enumerate(board.side_0):
+            if len(row) < 3:
+                legal = idx
+                if dice in row:
+                    return cast(Literal[0,1,2], idx)
+        
+        return cast(Literal[0,1,2], legal)
+
 
 
 
