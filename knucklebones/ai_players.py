@@ -3,40 +3,13 @@ from random import choice
 from typing import Literal, cast
 
 players_dict = {
-    "human": lambda name: Human_Player(name),
     "random": lambda name: Random_Player(name),
     "sequential": lambda name: Sequential_Player(name),
     "aggressive": lambda name: Aggressive_Player(name),
     "smart": lambda name: Smart_Player(name),
     "stupid": lambda name: Stupid_Player(name),
 }
-
-
-class Human_Player(Player):
-    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
-        
-        dice_art = f'''
-            -----
-            | {dice} |
-            -----'''.center(40)
-        print("\n"*2 + f"{self.name}, it's your turn! You rolled a:" + dice_art)
-        
-
-        board.print_board(bool(turn))
-        while True:
-            try:
-                row = int(input("Select a row to place your dice (1, 2, or 3): "))-1
-                if row not in [0, 1, 2]:
-                    print("Invalid row. Please select 1, 2, or 3.")
-                    continue
-                if len(board.side_0[row]) >= 3:
-                    print("That row is full. Please select a different row.")
-                    continue
-                
-                return cast(Literal[0,1,2], row)
-                
-            except ValueError:
-                print("Invalid input. Please enter a number.")
+    
 
 class Random_Player(Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
