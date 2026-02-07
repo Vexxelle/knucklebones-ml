@@ -27,6 +27,6 @@ players.py contains 8 different AI implementations:
 ## Usage
 
 - **main.py**: Interactive game mode (human vs bot or human vs human)
-- **matchup_statistics.py**: Runs 10,000 matches between all player pairs and outputs win rates
+- **matchup_statisctics.py**: Runs 10,000 matches between all player pairs and outputs win rates
 
 The project helps analyze which AI strategies perform best against each other.
