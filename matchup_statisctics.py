@@ -2,7 +2,7 @@ import main as kb
 
 players = [kb.Aggressive_Player, kb.Random_Player, kb.Sequential_Player, kb.Smart_Player]
 
-matches_per_player = 1000
+matches_per_player = 100000
 
 def gather_statistics(p1: kb.Player, p2: kb.Player, num_matches: int) -> dict:
     match_outcomes = []
