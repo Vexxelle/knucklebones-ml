@@ -1,6 +1,6 @@
 import main as kb
 
-players = [kb.Aggressive_Player, kb.Random_Player, kb.Sequential_Player, kb.Smart_Player, kb.Combo_Player]
+players = [kb.Pupser, kb.Aggressive_Player, kb.Random_Player, kb.Sequential_Player, kb.Smart_Player, kb.Combo_Player, kb.Stupip_Player]
 
 matches_per_player = 10000
 
@@ -15,7 +15,8 @@ def gather_statistics(p1: kb.Player, p2: kb.Player, num_matches: int) -> dict:
     stats["p1_wins"] = sum([1 for match in match_outcomes if match[0] > match[1]])
     stats["p1_losses"] = sum([1 for match in match_outcomes if match[0] < match[1]])
     stats["ties"] = sum([1 for match in match_outcomes if match[0] == match[1]])
-    stats["winrate"] = stats["p1_wins"]/(num_matches-stats["ties"])
+    try: stats["winrate"] = stats["p1_wins"]/(num_matches-stats["ties"])
+    except ZeroDivisionError: stats["winrate"] = 0.5 
 
     return stats
 

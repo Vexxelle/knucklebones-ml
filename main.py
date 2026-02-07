@@ -151,6 +151,23 @@ class Smart_Player(Player):
 
         return cast(Literal[0,1,2], best_row)
     
+class Stupip_Player(Player):
+    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
+        def rel_score(board: Board) -> int:
+            return board.evaluate_score(0) - board.evaluate_score(1)
+
+        best_row = -1
+        best_score = float('inf')
+        for i in range(3):
+            temp_board = board.copy(0)
+            if not temp_board.place_die(0, i, dice): 
+                continue
+            if rel_score(temp_board) <= best_score:
+                best_row = i
+                best_score = rel_score(temp_board)
+
+        return cast(Literal[0,1,2], best_row)
+
 class Combo_Player(Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         for idx,row in enumerate(board.side_0):
@@ -160,6 +177,73 @@ class Combo_Player(Player):
                     return cast(Literal[0,1,2], idx)
         
         return cast(Literal[0,1,2], legal)
+
+e = 0
+s = 0
+class Pupser(Player):
+    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
+        global e, s
+
+        best_delta = -100
+        best_play = -1
+
+        # no special action
+        def side_play(dice: int, board: Board):
+            big = False
+            if dice > 3:
+                big = True
+
+            # place big number in safe zone
+            if big:
+                for idx,row in enumerate(board.side_1):
+                    if len(row) == 3:
+                        best_play = 1
+
+
+            # actual random
+            for idx,row in enumerate(board.side_0):
+                if len(row) < 3:
+                    return idx
+
+        # delete
+        for idx,row in enumerate(board.side_1):
+            if dice in row and len(board.side_0[idx]) < 3:
+                points = row.count(dice) * dice + dice
+
+                for srow in board.side_0:
+                    for n in srow:
+                        if srow.count(n) > 1:
+                            points -= (srow.count(dice))**2 * dice / 2
+                            # print(board.side_0, board.side_1, points, dice)
+                        
+                if points > best_delta:
+                    best_delta = points
+                    best_play = idx
+        
+        #print("del", best_delta, best_play)
+        
+        # combo
+        for idx,row in enumerate(board.side_0):
+            if dice in row and len(row) < 3:
+                points = (row.count(dice) + 1)**2 * dice
+                if points > best_delta:
+                    best_delta = points
+                    best_play = idx
+                # return cast(Literal[0,1,2], idx)
+            
+        #print("com", best_delta, best_play)
+        
+        # else
+        if best_play == -1:
+            s += 1
+            return cast(Literal[0,1,2], side_play(dice, board))
+        e += 1
+        return cast(Literal[0,1,2], best_play)
+                    
+            
+
+
+
 
 
 
