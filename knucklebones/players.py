@@ -1,13 +1,16 @@
-from main import Board
-from random import choice, randint
+from .game import Player, Board
+from random import choice
 from typing import Literal, cast
 
-class Player:
-    def __init__(self, name: str): 
-        self.name = name
+players_dict = {
+    "human": lambda name: Human_Player(name),
+    "random": lambda name: Random_Player(name),
+    "sequential": lambda name: Sequential_Player(name),
+    "aggressive": lambda name: Aggressive_Player(name),
+    "smart": lambda name: Smart_Player(name),
+    "stupid": lambda name: Stupid_Player(name),
+}
 
-    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
-        return 0
 
 class Human_Player(Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
@@ -82,7 +85,7 @@ class Smart_Player(Player):
 
         return cast(Literal[0,1,2], best_row)
     
-class Stupip_Player(Player):
+class Stupid_Player(Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         def rel_score(board: Board) -> int:
             return board.evaluate_score(0) - board.evaluate_score(1)

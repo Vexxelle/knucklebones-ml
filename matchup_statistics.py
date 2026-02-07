@@ -1,13 +1,13 @@
-import main as kb
+import knucklebones
 
-players = [kb.Pupser, kb.Aggressive_Player, kb.Random_Player, kb.Sequential_Player, kb.Smart_Player, kb.Combo_Player, kb.Stupip_Player]
+players = [knucklebones.players.Pupser, knucklebones.players.Aggressive_Player, knucklebones.players.Random_Player, knucklebones.players.Sequential_Player, knucklebones.players.Smart_Player, knucklebones.players.Combo_Player, knucklebones.players.Stupid_Player]
 
 matches_per_player = 10000
 
-def gather_statistics(p1: kb.Player, p2: kb.Player, num_matches: int) -> dict:
+def gather_statistics(p1: knucklebones.players.Player, p2: knucklebones.players.Player, num_matches: int) -> dict:
     match_outcomes = []
     for _ in range(num_matches):
-        result = kb.play_knucklebones(p1, p2)
+        result = knucklebones.play(p1, p2)
         match_outcomes.append(result)
 
     # Evaluate Outcomes
