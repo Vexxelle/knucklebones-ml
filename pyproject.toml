@@ -1,7 +1,7 @@
 [project]
 name = "knucklebones-ml"
 version = "0.1.0"
-description = "Add your description here"
+description = "Python implementation of Dice Game 'Knucklebones' from Cult of the Lamb"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
