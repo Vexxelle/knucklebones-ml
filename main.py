@@ -49,8 +49,12 @@ class Board:
         return side_0_full or side_1_full
         
     
-    def print_board(self) -> None:
-        print(f"Player 1 Side ({self.evaluate_score(0)}):" + " "*12 + f"Player 2 Side ({self.evaluate_score(1)}):")
+    def print_board(self, flip: bool = False) -> None: 
+        if flip:
+            print(f"Player 2 Side ({self.evaluate_score(0)}):" + " "*12 + f"Player 1 Side ({self.evaluate_score(1)}):")
+        else:
+            print(f"Player 1 Side ({self.evaluate_score(0)}):" + " "*12 + f"Player 2 Side ({self.evaluate_score(1)}):")
+        
         for i in range(3):
             print("Row " + str(i+1) + ": ", end="")
             print(str(self.side_0[i]).center(10), end="    ")
@@ -71,11 +75,11 @@ class Player:
     def __init__(self, name: str): 
         self.name = name
 
-    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         return 0
 
 class Human_Player(Player):
-    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         
         dice_art = f'''
             -----
@@ -84,7 +88,7 @@ class Human_Player(Player):
         print("\n"*2 + f"{self.name}, it's your turn! You rolled a:" + dice_art)
         
 
-        board.print_board()
+        board.print_board(turn)
         while True:
             try:
                 row = int(input("Select a row to place your dice (1, 2, or 3): "))-1
@@ -101,19 +105,19 @@ class Human_Player(Player):
                 print("Invalid input. Please enter a number.")
 
 class Random_Player(Player):
-    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         valid_rows = [i for i in range(3) if len(board.side_0[i]) < 3]
         return cast(Literal[0,1,2], choice(valid_rows))
 
 class Sequential_Player(Player):
-    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         for i in range(3):
             if len(board.side_0[i]) < 3:
                 return cast(Literal[0,1,2], i)
         return 0  # Fallback, should never reach here
 
 class Aggressive_Player(Player):
-    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         # Look for a row to place the dice that would remove the most opponent dice
         best_row = 0
         most_removed = 0
@@ -131,7 +135,7 @@ class Aggressive_Player(Player):
         return cast(Literal[0,1,2], best_row)
     
 class Smart_Player(Player):
-    def play(self, dice: int, board: Board) -> Literal[0,1,2]:
+    def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         def rel_score(board: Board) -> int:
             return board.evaluate_score(0) - board.evaluate_score(1)
 
@@ -164,12 +168,12 @@ def play_knucklebones(player0: Player, player1: Player, ui: bool = False) -> tup
     while not board.is_full():
         dice = randint(1, 6)
         if turn == 0:
-            row = player0.play(dice, board.copy(0))
+            row = player0.play(dice, board.copy(0), turn)
             if not board.place_die(0, row, dice):
                 raise ValueError(f"Invalid move by {player0.name} on row {row+1} with die {dice}.")
             turn = 1
         else:
-            row = player1.play(dice, board.copy(1))
+            row = player1.play(dice, board.copy(1), turn)
             if not board.place_die(1, row, dice):
                 raise ValueError(f"Invalid move by {player1.name} on row {row+1} with die {dice}.")
             turn = 0
