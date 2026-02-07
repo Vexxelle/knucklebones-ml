@@ -3,9 +3,11 @@ from typing import Literal, cast
 
 
 class Board:
-    def __init__(self, side_0: list[list] = [[], [], []], side_1: list[list] = [[], [], []]):
-        self.side_0 = side_0
-        self.side_1 = side_1
+    def __init__(self, side_0: list[list]|None = None, side_1: list[list]|None = None):
+        if side_0: self.side_0 = side_0
+        else: self.side_0 = [[], [], []]
+        if side_1: self.side_1 = side_1
+        else: self.side_1 = [[], [], []]
 
     def place_die(self, side: Literal[0,1], row: int, die: int) -> bool:
         if side == 0:
@@ -57,9 +59,9 @@ class Board:
 
     def copy(self, primary_side: Literal[0,1] = 0) -> "Board":
         if primary_side == 0:
-            return Board(self.side_0, self.side_1)
+            return Board(self.side_0.copy(), self.side_1.copy())
         else:
-            return Board(self.side_1, self.side_0)
+            return Board(self.side_1.copy(), self.side_0.copy())
         
 class Player:
     def __init__(self, name: str): 
@@ -111,11 +113,11 @@ class Aggressive_Player(Player):
         # Look for a row to place the dice that would remove the most opponent dice
         best_row = 0
         most_removed = 0
-        for i, row in enumerate(board.side_1):
-            if len(row) < 3:
-                if row.count(dice) > most_removed:
+        for i, opponent_row in enumerate(board.side_1):
+            if len(board.side_0[i]) < 3:
+                if opponent_row.count(dice) > most_removed:
                     best_row = i
-                    most_removed = row.count(dice)
+                    most_removed = opponent_row.count(dice)
         
         if most_removed == 0:
             # If no dice can be removed, just place in the first available row
@@ -133,7 +135,8 @@ class Smart_Player(Player):
         best_score = float('-inf')
         for i in range(3):
             temp_board = board.copy(0)
-            temp_board.place_die(0, i, dice)
+            if not temp_board.place_die(0, i, dice): 
+                continue
             if rel_score(temp_board) >= best_score:
                 best_row = i
                 best_score = rel_score(temp_board)
@@ -163,7 +166,7 @@ def play_knucklebones(player0: Player, player1: Player, ui: bool = False) -> tup
             turn = 1
         else:
             row = player1.play(dice, board.copy(1))
-            if not board.place_die(0, row, dice):
+            if not board.place_die(1, row, dice):
                 raise ValueError(f"Invalid move by {player1.name} on row {row+1} with die {dice}.")
             turn = 0
 
