@@ -2,28 +2,34 @@ from .game import Player, Board
 from random import choice
 from typing import Literal, cast
 
-players_dict = {
-    "random": lambda name: Random_Player(name),
-    "sequential": lambda name: Sequential_Player(name),
-    "aggressive": lambda name: Aggressive_Player(name),
-    "smart": lambda name: Smart_Player(name),
-    "stupid": lambda name: Stupid_Player(name),
+PLAYER_LIST = {
+    "random":       {"name": "Random Player",      "adjective": "Confused",     "constructor": lambda name: Random_Player(name)},
+    "sequential":   {"name": "Sequential Player",  "adjective": "Methodical",   "constructor": lambda name: Sequential_Player(name)},
+    "aggressive":   {"name": "Aggressive Player",  "adjective": "Aggressive",   "constructor": lambda name: Aggressive_Player(name)},
+    "smart":        {"name": "Smart Player",       "adjective": "Smart",        "constructor": lambda name: Smart_Player(name)},
+    "stupid":       {"name": "Stupid Player",      "adjective": "Slow",         "constructor": lambda name: Stupid_Player(name)},
+    "combo":        {"name": "Combo Player",       "adjective": "Gambler",      "constructor": lambda name: Combo_Player(name)},
+    "pupser":       {"name": "Der Pupser",         "adjective": "Stinky",       "constructor": lambda name: Pupser(name)}
 }
-    
 
-class Random_Player(Player):
+class AI_Player(Player):
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.type = "ai"
+
+class Random_Player(AI_Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         valid_rows = [i for i in range(3) if len(board.side_0[i]) < 3]
         return cast(Literal[0,1,2], choice(valid_rows))
 
-class Sequential_Player(Player):
+class Sequential_Player(AI_Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         for i in range(3):
             if len(board.side_0[i]) < 3:
                 return cast(Literal[0,1,2], i)
         return 0  # Fallback, should never reach here
 
-class Aggressive_Player(Player):
+class Aggressive_Player(AI_Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         # Look for a row to place the dice that would remove the most opponent dice
         best_row = 0
@@ -41,7 +47,7 @@ class Aggressive_Player(Player):
                     return cast(Literal[0,1,2], i)
         return cast(Literal[0,1,2], best_row)
     
-class Smart_Player(Player):
+class Smart_Player(AI_Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         def rel_score(board: Board) -> int:
             return board.evaluate_score(0) - board.evaluate_score(1)
@@ -58,7 +64,7 @@ class Smart_Player(Player):
 
         return cast(Literal[0,1,2], best_row)
     
-class Stupid_Player(Player):
+class Stupid_Player(AI_Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         def rel_score(board: Board) -> int:
             return board.evaluate_score(0) - board.evaluate_score(1)
@@ -75,7 +81,7 @@ class Stupid_Player(Player):
 
         return cast(Literal[0,1,2], best_row)
 
-class Combo_Player(Player):
+class Combo_Player(AI_Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         legal = -1
         for idx,row in enumerate(board.side_0):
@@ -88,12 +94,15 @@ class Combo_Player(Player):
 
 e = 0
 s = 0
-class Pupser(Player):
+class Pupser(AI_Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         global e, s
 
-        best_delta = -100
+        best_delta = float('-inf')
         best_play = -1
+
+        def rel_score(board: Board) -> int:
+            return board.evaluate_score(0) - board.evaluate_score(1)
 
         # no special action
         def side_play(dice: int, board: Board):
@@ -114,15 +123,25 @@ class Pupser(Player):
                     return idx
 
         # delete
-        for idx,row in enumerate(board.side_1):
-            if dice in row and len(board.side_0[idx]) < 3:
-                points = row.count(dice) * dice + dice
+        for idx,erow in enumerate(board.side_1):
+            temp_board = board.copy(0)
+            if erow.count(dice) > 0 and temp_board.place_die(0, idx, dice): # maybe remove first cond and make it general
+                points = (erow.count(dice))**2 * dice + (board.side_0[idx].count(dice) + 1)**2 * dice
 
-                for srow in board.side_0:
-                    for n in srow:
-                        if srow.count(n) > 1:
-                            points -= (srow.count(dice))**2 * dice / 2
-                            # print(board.side_0, board.side_1, points, dice)
+                for i in range(1, 6+1):
+                    if i in board.side_0[idx] and len(board.side_0[idx]) < 3:
+                        empty = 9 - len(board.side_1[0]) + len(board.side_1[1]) +  len(board.side_1[2]) + board.side_1[idx].count(dice)
+                        prob = 0
+                        for p in range(empty):
+                            prob += 1/6 * (5/6)**p
+
+                        print("checking", i)
+                        print(points, dice)
+                        points -= prob * (i * (board.side_0[idx].count(i))**2)
+                        print(board.side_0, board.side_1)
+                        print(empty, prob, points)
+                        print(idx)
+                print()
                         
                 if points > best_delta:
                     best_delta = points

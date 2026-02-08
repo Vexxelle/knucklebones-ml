@@ -1,5 +1,8 @@
 from random import randint
 from typing import Literal, cast
+import knucklebones.ui as ui
+
+interface = ui.No_UI()
 
 class Board:
     def __init__(self, side_0: list[list]|None = None, side_1: list[list]|None = None):
@@ -73,55 +76,37 @@ class Board:
 class Player:
     def __init__(self, name: str): 
         self.name = name
+        self.type = None
+        self.side = None
 
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
         return 0
     
 class Human_Player(Player):
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.type = "human"
+
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
-        
-        dice_art = f'''
-            -----
-            | {dice} |
-            -----'''.center(40)
-        print("\n"*2 + f"{self.name}, it's your turn! You rolled a:" + dice_art)
-        
+        row = interface.select_row(self, board, dice)
+        return row
 
-        board.print_board(bool(turn))
-        while True:
-            try:
-                row = int(input("Select a row to place your dice (1, 2, or 3): "))-1
-                if row not in [0, 1, 2]:
-                    print("Invalid row. Please select 1, 2, or 3.")
-                    continue
-                if len(board.side_0[row]) >= 3:
-                    print("That row is full. Please select a different row.")
-                    continue
-                
-                return cast(Literal[0,1,2], row)
-                
-            except ValueError:
-                print("Invalid input. Please enter a number.")
-
-def play(player0: Player, player1: Player, ui: bool = False) -> tuple[int, int]:
+def play(player0: Player, player1: Player, start_turn: Literal[None, 0, 1] = None) -> tuple[int, int]:
     # Initialize Game
-    if ui:
-        print("Welcome to Knucklebones!")
-        print(f"Player 1: {player0.name}")
-        print(f"Player 2: {player1.name}")
-        print("Let's begin!\n")
     board = Board()
-    turn = randint(0, 1)
+    turn = start_turn if start_turn is not None else randint(0, 1)
 
     # Game Loop
     while not board.is_full():
         dice = randint(1, 6)
         if turn == 0:
+            interface.show_turn_start(player0.name, dice, player0.type)
             row = player0.play(dice, board.copy(0), turn)
             if not board.place_die(0, row, dice):
                 raise ValueError(f"Invalid move by {player0.name} on row {row+1} with die {dice}.")
             turn = 1
         elif turn == 1:
+            interface.show_turn_start(player1.name, dice, player1.type)
             row = player1.play(dice, board.copy(1), turn)
             if not board.place_die(1, row, dice):
                 raise ValueError(f"Invalid move by {player1.name} on row {row+1} with die {dice}.")
@@ -130,19 +115,6 @@ def play(player0: Player, player1: Player, ui: bool = False) -> tuple[int, int]:
     score_0 = board.evaluate_score(0)
     score_1 = board.evaluate_score(1)
 
-    # Game Over
-    if ui:
-        print("\n\nFinal Board State:")
-        board.print_board()
 
-        print("\nGame Over!")
-        if score_0 > score_1:
-            print(f"{player0.name} wins with a score of {score_0} against {score_1}!")
-        elif score_1 > score_0:
-            print(f"{player1.name} wins with a score of {score_1} against {score_0}!")
-        else:
-            print(f"It's a tie! Both players scored {score_0}!")
-
-        print("Thanks for playing!")
     
     return score_0, score_1
