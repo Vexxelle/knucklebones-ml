@@ -91,6 +91,11 @@ class Human_Player(Player):
         row = interface.select_row(self, board, dice)
         return row
 
+class AI_Player(Player):
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.type = "ai"
+
 def play(player0: Player, player1: Player, start_turn: Literal[None, 0, 1] = None) -> tuple[int, int]:
     # Initialize Game
     board = Board()

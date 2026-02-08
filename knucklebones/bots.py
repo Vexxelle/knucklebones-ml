@@ -1,4 +1,4 @@
-from .game import Player, Board
+from .game import Player, Board, AI_Player
 from random import choice
 from typing import Literal, cast
 
@@ -11,11 +11,6 @@ PLAYER_LIST = {
     "combo":        {"name": "Combo Player",       "adjective": "Gambler",      "constructor": lambda name: Combo_Player(name)},
     "pupser":       {"name": "Der Pupser",         "adjective": "Stinky",       "constructor": lambda name: Pupser(name)}
 }
-
-class AI_Player(Player):
-    def __init__(self, name: str):
-        super().__init__(name)
-        self.type = "ai"
 
 class Random_Player(AI_Player):
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
