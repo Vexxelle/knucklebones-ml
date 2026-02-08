@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Literal
 from blessed import Terminal
+from random import choice
 
 if TYPE_CHECKING:
     from .game import Board, Player
@@ -32,6 +33,9 @@ class No_UI(User_Interface):
     def display_board(self, board: "Board", flip: bool) -> None:
         pass
 
+    def select_row(self, player: "Player", board: "Board", dice: int) -> Literal[0,1,2]:
+        raise NotImplementedError("No_UI does not support player input. Please choose AI players in the main function and pass them to play().")
+    
     def show_turn_start(self, player_name: str, dice: int, player_type: Literal["human", "ai"]|None) -> None:
         pass
 
@@ -43,11 +47,31 @@ class No_UI(User_Interface):
 
 class Test_UI(User_Interface):
     def choose_players(self) -> tuple["Player", "Player"]:
-        raise NotImplementedError("Test_UI does not support player selection. Please choose players in the main function and pass them to play().")
+        from .game import Human_Player
+        from .bots import PLAYER_LIST
+        
+        p1 = Human_Player("Player 1")
+        if input("Is Player 2 a human? (y/n): ").lower() == 'y':
+            p2 = Human_Player("Player 2")
+        else:
+            p2 = PLAYER_LIST[choice(list(PLAYER_LIST.keys()))]["constructor"]("Player 2")
+        return (p1, p2)
 
     def display_board(self, board: "Board", flip: bool) -> None:
         print("Displaying Board:")
         board.print_board(flip)
+
+    def select_row(self, player: "Player", board: "Board", dice: int) -> Literal[0,1,2]:
+        self.display_board(board, flip=False)
+        while True:
+            try:
+                row = int(input(f"{player.name}, select a row (1-3) to place your {dice}: ")) - 1
+                if 0 <= row <= 2 and len(board.side_0[row]) < 3:
+                    return row  # type: ignore
+                else:
+                    print("Invalid row. Choose an available row (1-3).")
+            except ValueError:
+                print("Please enter a number between 1 and 3.")
 
     def show_turn_start(self, player_name: str, dice: int, player_type: Literal["human", "ai"]|None) -> None:
         print(f"{player_name} is starting their turn with a roll of {dice}.")

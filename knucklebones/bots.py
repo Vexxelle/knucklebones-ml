@@ -1,4 +1,4 @@
-from .game import Player, Board, AI_Player
+from .game import Board, AI_Player
 from random import choice
 from typing import Literal, cast
 
