@@ -101,9 +101,6 @@ class Pupser(AI_Player):
         best_delta = float('-inf')
         best_play = -1
 
-        def rel_score(board: Board) -> int:
-            return board.evaluate_score(0) - board.evaluate_score(1)
-
         # no special action
         def side_play(dice: int, board: Board):
             big = False
@@ -125,7 +122,7 @@ class Pupser(AI_Player):
         # delete
         for idx,erow in enumerate(board.side_1):
             temp_board = board.copy(0)
-            if erow.count(dice) > 0 and temp_board.place_die(0, idx, dice): # maybe remove first cond and make it general
+            if temp_board.place_die(0, idx, dice): #and erow.count(dice) > 0: # maybe remove first cond and make it general
                 points = (erow.count(dice))**2 * dice + (board.side_0[idx].count(dice) + 1)**2 * dice
 
                 for i in range(1, 6+1):
@@ -135,13 +132,13 @@ class Pupser(AI_Player):
                         for p in range(empty):
                             prob += 1/6 * (5/6)**p
 
-                        print("checking", i)
-                        print(points, dice)
+                        #print("checking", i)
+                        #print(points, dice)
                         points -= prob * (i * (board.side_0[idx].count(i))**2)
-                        print(board.side_0, board.side_1)
-                        print(empty, prob, points)
-                        print(idx)
-                print()
+                        #print(board.side_0, board.side_1)
+                        #print(empty, prob, points)
+                        #print(idx)
+                #print()
                         
                 if points > best_delta:
                     best_delta = points
@@ -149,6 +146,8 @@ class Pupser(AI_Player):
         
         #print("del", best_delta, best_play)
         
+        return cast(Literal[0,1,2], best_play)  
+
         # combo
         for idx,row in enumerate(board.side_0):
             if dice in row and len(row) < 3:
