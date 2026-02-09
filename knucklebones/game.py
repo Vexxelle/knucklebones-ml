@@ -1,8 +1,8 @@
 from random import randint
 from typing import Literal, cast
-import knucklebones.ui as ui
 
-interface = ui.No_UI()
+# Interface will be set by the main module
+interface = None
 
 class Board:
     def __init__(self, side_0: list[list]|None = None, side_1: list[list]|None = None):
@@ -88,10 +88,24 @@ class Human_Player(Player):
         self.type = "human"
 
     def play(self, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
+        if interface is None:
+            raise RuntimeError("Interface not set. Please set knucklebones.interface before playing.")
         row = interface.select_row(self, board, dice)
         return row
 
+class AI_Player(Player):
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.type = "ai"
+
+def player_turn(player: Player, dice: int, board: Board, turn: Literal[0,1]) -> Literal[0,1,2]:
+    row = interface.select_row(player, board, dice)
+    return cast(Literal[0,1,2], row)
+
 def play(player0: Player, player1: Player, start_turn: Literal[None, 0, 1] = None) -> tuple[int, int]:
+    if interface is None:
+        raise RuntimeError("Interface not set. Please set knucklebones.interface before playing.")
+    
     # Initialize Game
     board = Board()
     turn = start_turn if start_turn is not None else randint(0, 1)
@@ -104,17 +118,19 @@ def play(player0: Player, player1: Player, start_turn: Literal[None, 0, 1] = Non
             row = player0.play(dice, board.copy(0), turn)
             if not board.place_die(0, row, dice):
                 raise ValueError(f"Invalid move by {player0.name} on row {row+1} with die {dice}.")
+            interface.show_turn_end(player0.name, dice, row)
             turn = 1
         elif turn == 1:
             interface.show_turn_start(player1.name, dice, player1.type)
             row = player1.play(dice, board.copy(1), turn)
             if not board.place_die(1, row, dice):
                 raise ValueError(f"Invalid move by {player1.name} on row {row+1} with die {dice}.")
+            interface.show_turn_end(player1.name, dice, row)
             turn = 0
 
     score_0 = board.evaluate_score(0)
     score_1 = board.evaluate_score(1)
 
-
+    interface.show_game_end(player0.name, player1.name, score_0, score_1)
     
     return score_0, score_1
