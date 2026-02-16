@@ -18,8 +18,20 @@ build-backend = "hatchling.build"
 dev = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
+    "ruff>=0.15.1",
 ]
 
+[tool.ruff]
+# Target Python version
+target-version = "py312"
+line-length = 88
+# Choose which rules to enable (E = Error, F = Pyflakes, I = Import Sort)
+lint.select = ["E", "F", "I", "PL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["knucklebones_ml"]
+
 [tool.pytest.ini_options]
-addopts = "--cov=src"
+pythonpath = ["src"]
+testpath = ["tests"]
 strict = true

@@ -1,4 +1,5 @@
-import knucklebones
+import knucklebones_ml
+
 
 def main():
     knucklebones.game.interface = knucklebones.ui.Test_UI()
