@@ -67,3 +67,6 @@ def apply_action(die: int, board: tuple[np.ndarray, np.ndarray], side: int, acti
     ])
 
     return board
+
+def board_is_full(board: tuple[np.ndarray, np.ndarray]) -> bool:
+    return bool(np.all(board[0] != 0)) or bool(np.all(board[1] != 0))
