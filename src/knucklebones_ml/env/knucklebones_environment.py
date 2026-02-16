@@ -1,5 +1,13 @@
-from pettingzoo import AECEnv
+"""
+PettingZoo environment for Knucklebones dice game.
+This module defines the KnucklebonesEnvironment class,
+implementing the PettingZoo AECEnv interface.
+"""
+
 from copy import copy
+
+from pettingzoo import AECEnv
+
 
 class KnucklebonesEnvironment(AECEnv):
     metadata = {
