@@ -3,7 +3,7 @@ from blessed import Terminal
 from random import choice
 
 if TYPE_CHECKING:
-    from .game import Board, Player
+    from .core.game import Board, Player
 
 
 class User_Interface:
@@ -25,29 +25,9 @@ class User_Interface:
     def show_game_end(self, player_1_name: str, player_2_name: str, score_1: int, score_2: int) -> None:
         raise NotImplementedError
 
-# No UI
-class No_UI(User_Interface):
-    def choose_players(self) -> tuple["Player", "Player"]:
-        raise NotImplementedError("No_UI does not support player selection. Please choose players in the main function and pass them to play().")
-
-    def display_board(self, board: "Board", flip: bool) -> None:
-        pass
-
-    def select_row(self, player: "Player", board: "Board", dice: int) -> Literal[0,1,2]:
-        raise NotImplementedError("No_UI does not support player input. Please choose AI players in the main function and pass them to play().")
-    
-    def show_turn_start(self, player_name: str, dice: int, player_type: Literal["human", "ai"]|None) -> None:
-        pass
-
-    def show_turn_end(self, player_name: str, dice: int, row: int) -> None:
-        pass
-
-    def show_game_end(self, player_1_name: str, player_2_name: str, score_1: int, score_2: int) -> None:
-        pass
-
 class Test_UI(User_Interface):
     def choose_players(self) -> tuple["Player", "Player"]:
-        from .game import Human_Player
+        from .core.player import Human_Player
         from .bots import PLAYER_LIST
         
         p1 = Human_Player("Player 1")
@@ -58,8 +38,7 @@ class Test_UI(User_Interface):
         return (p1, p2)
 
     def display_board(self, board: "Board", flip: bool) -> None:
-        print("Displaying Board:")
-        board.print_board(flip)
+        pass
 
     def select_row(self, player: "Player", board: "Board", dice: int) -> Literal[0,1,2]:
         self.display_board(board, flip=False)

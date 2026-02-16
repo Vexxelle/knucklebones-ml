@@ -1,9 +1,17 @@
 [project]
-name = "knucklebones-ml"
+name = "knucklebones_ml"
 version = "0.1.0"
 description = "Python implementation of Dice Game 'Knucklebones' from Cult of the Lamb"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "blessed>=1.30.0",
+    "numpy>=2.4.2",
+    "pettingzoo>=1.25.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 ]

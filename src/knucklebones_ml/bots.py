@@ -1,6 +1,8 @@
-from .game import Board, AI_Player
 from random import choice
 from typing import Literal, cast
+
+from .core.board import Board
+from .core.player import AI_Player
 
 PLAYER_LIST = {
     "random":       {"name": "Random Player",      "adjective": "Confused",     "constructor": lambda name: Random_Player(name)},
