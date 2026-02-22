@@ -19,23 +19,27 @@ def test_evaluate_column_score(sample_board_mixed):
 
 def test_evaluate_board_scores(sample_board_mixed):
     assert np.array_equal(
-        logic.evaluate_board_scores(sample_board_mixed), np.array([53, 32])
+        logic.evaluate_board_scores(sample_board_mixed),
+        np.array([53, 32]),
     )
 
 
 def test_get_valid_actions(sample_board_empty, sample_board_full, sample_board_mixed):
     assert np.array_equal(
-        logic.get_valid_actions(sample_board_empty), np.array([[1, 1, 1], [1, 1, 1]])
+        logic.get_valid_actions(sample_board_empty),
+        np.array([[1, 1, 1], [1, 1, 1]]),
     )
     assert np.array_equal(
-        logic.get_valid_actions(sample_board_full), np.array([[0, 0, 0], [0, 0, 0]])
+        logic.get_valid_actions(sample_board_full),
+        np.array([[0, 0, 0], [0, 0, 0]]),
     )
     assert np.array_equal(
-        logic.get_valid_actions(sample_board_mixed), np.array([[1, 0, 0], [1, 1, 1]])
+        logic.get_valid_actions(sample_board_mixed),
+        np.array([[1, 0, 0], [1, 1, 1]]),
     )
 
 
-def test_apply_action(sample_board_empty, sample_board_mixed):
+def test_apply_action(sample_board_empty):
     board = logic.apply_action(3, sample_board_empty.copy(), 0, 1)
     assert board[0, 2, 1] == 3  # noqa: PLR2004
     assert np.all(board[1] == 0)
@@ -57,7 +61,7 @@ def test_apply_action(sample_board_empty, sample_board_mixed):
 
 
 def test_apply_action_full_column(sample_board_full):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Column 1 is full."):
         logic.apply_action(3, sample_board_full, 1, 1)
 
 
