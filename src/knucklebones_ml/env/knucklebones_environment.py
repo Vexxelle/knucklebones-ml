@@ -1,39 +1,80 @@
 """
 PettingZoo environment for Knucklebones dice game.
+
 This module defines the KnucklebonesEnvironment class,
 implementing the PettingZoo AECEnv interface.
 """
 
+import functools
+from collections import defaultdict
 from copy import copy
 
+import numpy as np
 from pettingzoo import AECEnv
+from pettingzoo.utils.env import ActionType
+
+from . import core_logic as logic
+
+
+@functools.cache
+def _observation_space():
+    raise NotImplementedError
+
+
+@functools.cache
+def _action_space():
+    raise NotImplementedError
 
 
 class KnucklebonesEnvironment(AECEnv):
-    metadata = {
+    """
+    Knucklebones game environment using AEC API.
+
+    This environment implements a two-player Knucklebones game where agents take turns
+    playing actions on a 3x3 board. It follows the PettingZoo AECEnv interface for
+    multi-agent reinforcement learning.
+
+    """
+
+    metadata = {  # noqa: RUF012
         "name": "knucklebones_environment_v0",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.timestep = None
         self.possible_agents = ["player_0", "player_1"]
         self.seed = None
+        self.board = None
 
-    def reset(self, seed=None, options=None):
+    def reset(self, seed: int | None = None, options: dict | None = None) -> None:
+        """Reset the environment to the initial state."""
         self.timestep = 0
         self.agents = copy(self.possible_agents)
+        self.board = logic.get_board(3, 3)
 
-        if seed is not None:
-            self.seed = seed
+        self.random_gen = np.random.default_rng(seed)
 
-    def step(self, action):
+        self.options = defaultdict(lambda: None, (options or {}))
+
+        observations = {
+            "player_0": {
+                "observation": (0, self.board.copy()),
+                "action_mask": logic.get_valid_actions(self.board),
+            },
+            "player_1": {
+                "observation": (0, self.board.copy()),
+                "action_mask": logic.get_valid_actions(self.board),
+            },
+        }
+
+    def step(self, action: ActionType) -> None:
         pass
 
     def render(self):
-        pass
+        raise NotImplementedError
 
     def observation_space(self, agent):
-        return self.observation_spaces[agent]
+        return _observation_space()
 
     def action_space(self, agent):
-        return self.action_spaces[agent]
+        return _action_space()
