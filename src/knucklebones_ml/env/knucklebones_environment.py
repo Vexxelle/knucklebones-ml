@@ -9,21 +9,29 @@ import functools
 from collections import defaultdict
 from copy import copy
 
+import gymnasium as gym
 import numpy as np
 from pettingzoo import AECEnv
-from pettingzoo.utils.env import ActionType
+from pettingzoo.utils.env import ActionType, ObsType
 
 from . import core_logic as logic
 
 
 @functools.cache
-def _observation_space():
-    raise NotImplementedError
+def _observation_space() -> gym.spaces.Dict:
+    return gym.spaces.Dict(
+        {
+            "observation": gym.spaces.Box(
+                low=0, high=6, shape=(2, 3, 3), dtype=np.int8
+            ),
+            "action_mask": gym.spaces.MultiBinary(3),
+        }
+    )
 
 
 @functools.cache
-def _action_space():
-    raise NotImplementedError
+def _action_space() -> gym.spaces.Discrete:
+    return gym.spaces.Discrete(3)
 
 
 class KnucklebonesEnvironment(AECEnv):
@@ -73,8 +81,8 @@ class KnucklebonesEnvironment(AECEnv):
     def render(self):
         raise NotImplementedError
 
-    def observation_space(self, agent):
+    def observation_space(self, agent) -> gym.spaces.Dict:
         return _observation_space()
 
-    def action_space(self, agent):
+    def action_space(self, agent) -> gym.spaces.Discrete:
         return _action_space()
