@@ -64,7 +64,7 @@ def get_valid_actions(board: np.ndarray) -> np.ndarray:
         is 1 if the column is a valid action (has empty space), 0 otherwise.
 
     """
-    valid_actions = (board[:, 0, :] == 0).astype(np.int16)
+    valid_actions = (board[:, 0, :] == 0).astype(np.int8)
     return valid_actions
 
 
