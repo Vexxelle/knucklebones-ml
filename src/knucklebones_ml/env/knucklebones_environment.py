@@ -40,14 +40,24 @@ def env(render_mode: str | None = None) -> AECEnv:
 
     Args:
         render_mode (str | None): String specifying the rendering mode
-            (human, ascii or pygame) for the environment.
+            (human, ascii/ansi or pygame) for the environment.
             If not provided, defaults to None (no rendering).
 
     Returns:
         raw_env: An instance of the Knucklebones environment.
 
     """
-    if render_mode == "human":
+    if render_mode is not None and render_mode not in {
+        "human",
+        "ascii",
+        "ansi",
+        "pygame",
+    }:
+        msg = f"Invalid render_mode: {render_mode}. Must be one of 'human', 'ascii',\
+'ansi', 'pygame', or None."
+        raise ValueError(msg)
+
+    if render_mode in {"human", "ansi"}:
         render_mode = "ascii"
 
     env = raw_env(render_mode=render_mode)
@@ -137,11 +147,12 @@ class raw_env(AECEnv):  # noqa: N801
         }
 
     def render(self):
+        """Render the current state of the environment."""
         if self.render_mode:
             raise NotImplementedError
 
-    def close(self):
-        pass
+    def close(self) -> None:
+        """Close the environment and release any resources."""
 
     def observation_space(self, agent: str = "player_0") -> gym.spaces.Dict:  # noqa: ARG002
         """
