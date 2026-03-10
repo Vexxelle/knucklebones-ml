@@ -41,30 +41,15 @@ def env(render_mode: str | None = None) -> AECEnv:
 
     Args:
         render_mode (str | None): String specifying the rendering mode
-            (human, ascii/ansi or pygame) for the environment.
+            (human or ansi) for the environment.
             If not provided, defaults to None (no rendering).
 
     Returns:
-        raw_env: An instance of the Knucklebones environment.
+        AECEnv: A wrapped instance of the Knucklebones environment.
 
     """
-    if render_mode is not None and render_mode not in {
-        "human",
-        "ascii",
-        "ansi",
-        "pygame",
-    }:
-        msg = f"Invalid render_mode: {render_mode}. Must be one of 'human', 'ascii',\
-'ansi', 'pygame', or None."
-        raise ValueError(msg)
-
-    if render_mode in {"human", "ansi"}:
-        render_mode = "ascii"
-
     env = raw_env(render_mode=render_mode)
 
-    if render_mode == "ascii":
-        env = wrappers.CaptureStdoutWrapper(env)
     env = wrappers.TerminateIllegalWrapper(env, illegal_reward=-10)
     env = wrappers.AssertOutOfBoundsWrapper(env)
     env = wrappers.OrderEnforcingWrapper(env)
@@ -84,7 +69,7 @@ class raw_env(AECEnv):  # noqa: N801
 
     metadata = {  # noqa: RUF012
         "name": "knucklebones_environment_v0",
-        "render_modes": ["human", "ascii", "pygame"],  # TODO: Implement rendering modes
+        "render_modes": ["human", "ansi"],
     }
 
     def __init__(self, render_mode: str | None = None) -> None:
@@ -221,10 +206,18 @@ class raw_env(AECEnv):  # noqa: N801
             "action_mask": logic.get_valid_actions(adjusted_board)[0],
         }
 
-    def render(self):
+    def render(self) -> None:
         """Render the current state of the environment."""
-        if self.render_mode:
-            raise NotImplementedError
+        if not self.render_mode:
+            gym.logger.warn(
+                "You are calling render method without specifying any render mode."
+            )
+            return
+
+        print(f"Current Agent: {self.agent_selection}")
+        print(f"Current Die: {self.die}")
+        print("Board State:")
+        print(self.board)
 
     def close(self) -> None:
         """Close the environment and release any resources."""
