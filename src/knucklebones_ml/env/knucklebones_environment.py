@@ -14,7 +14,7 @@ from functools import cache
 import gymnasium as gym
 import numpy as np
 from pettingzoo import AECEnv
-from pettingzoo.utils import AgentSelector
+from pettingzoo.utils import AgentSelector, wrappers
 
 from . import core_logic as logic
 
@@ -32,6 +32,33 @@ def _observation_space() -> gym.spaces.Dict:
 @cache
 def _action_space() -> gym.spaces.Discrete:
     return gym.spaces.Discrete(3)
+
+
+def env(render_mode: str | None = None) -> AECEnv:
+    """
+    Create a new instance of the Knucklebones environment.
+
+    Args:
+        render_mode (str | None): String specifying the rendering mode
+            (human, ascii or pygame) for the environment.
+            If not provided, defaults to None (no rendering).
+
+    Returns:
+        raw_env: An instance of the Knucklebones environment.
+
+    """
+    if render_mode == "human":
+        render_mode = "ascii"
+
+    env = raw_env(render_mode=render_mode)
+
+    if render_mode == "ascii":
+        env = wrappers.CaptureStdoutWrapper(env)
+    env = wrappers.TerminateIllegalWrapper(env, illegal_reward=-10)
+    env = wrappers.AssertOutOfBoundsWrapper(env)
+    env = wrappers.OrderEnforcingWrapper(env)
+
+    return env
 
 
 class raw_env(AECEnv):  # noqa: N801
