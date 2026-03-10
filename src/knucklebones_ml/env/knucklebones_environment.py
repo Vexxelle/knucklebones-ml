@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections import defaultdict
 from copy import copy
 from functools import cache
+from typing import Literal
 
 import gymnasium as gym
 import numpy as np
@@ -124,6 +125,80 @@ class raw_env(AECEnv):  # noqa: N801
 
         self._agent_selector = AgentSelector(self.agents)
         self.agent_selection = self._agent_selector.next()
+
+    def step(self, action: Literal[0, 1, 2]) -> None:
+        """
+        Apply the specified action for the current agent and update environment state.
+
+        The action is an integer representing the column index (0, 1, or 2) where the
+        current player will place their die. The environment will then update the board
+        state by placing the die in the lowest available position in the specified
+        column for the current player, and remove any enemy dice in the same column that
+        match the placed die's value. The environment will also calculate rewards based
+        on the change in score for the current player, and check for terminal conditions
+        such as a full board or reaching the maximum number of steps.
+        """
+        if (
+            self.terminations[self.agent_selection]
+            or self.truncations[self.agent_selection]
+        ):
+            self._was_dead_step(action)
+            return
+
+        side = self.possible_agents.index(self.agent_selection)
+
+        self._cumulative_rewards[self.agent_selection] = 0
+
+        self.previous_board = self.board.copy()
+        self.previous_die = self.die
+
+        self.board = logic.apply_action(self.die, self.board, side, action)
+
+        # Short Term Reward calculation
+        # Change in relative score for the current player, max is 60, scaled linearly
+        current_r_score = (
+            logic.evaluate_board_scores(self.board)[side]
+            - logic.evaluate_board_scores(self.board)[1 - side]
+        )
+        previous_r_score = (
+            logic.evaluate_board_scores(self.previous_board)[side]
+            - logic.evaluate_board_scores(self.previous_board)[1 - side]
+        )
+        change = (current_r_score - previous_r_score) / 60
+
+        # Absolute score for the current player, max is 162, scaled with tanh
+        abs_score = np.tanh((logic.evaluate_board_scores(self.board)[side]) / 60)
+
+        # Scale short term reward 0.1x for both players
+        played_reward = 0.1 * (0.8 * change + 0.2 * abs_score)
+        idle_reward = -change * 0.1
+
+        # Long Term Reward (win/loss)
+        board_full = logic.board_is_full(self.board)
+        time_out = self.timestep >= (self.options["max_steps"] or float("inf"))
+
+        if board_full:
+            final_scores = logic.evaluate_board_scores(self.board)
+            if final_scores[side] > final_scores[1 - side]:
+                played_reward += 10 * abs_score  # Win
+            elif final_scores[side] < final_scores[1 - side]:
+                played_reward -= 10 * abs_score  # Loss
+            self.terminations = dict.fromkeys(self.agents, True)
+
+        if time_out:
+            self.truncations = dict.fromkeys(self.agents, True)
+
+        for agent in self.agents:
+            if agent == self.agent_selection:
+                self.rewards[agent] = played_reward
+            else:
+                self.rewards[agent] = idle_reward
+
+        self._accumulate_rewards()
+
+        self.die = self.random_gen.integers(1, 7, dtype=np.int16)
+        self.agent_selection = self._agent_selector.next()
+        self.timestep += 1
 
     def observe(self, agent: str) -> dict[str, np.int_ | np.ndarray]:
         """
