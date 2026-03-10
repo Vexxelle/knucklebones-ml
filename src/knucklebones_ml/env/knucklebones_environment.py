@@ -53,7 +53,7 @@ class raw_env(AECEnv):  # noqa: N801
         self.random_gen = np.random.default_rng(seed)
         self.options = defaultdict(lambda: None, (options or {}))
 
-        self.die = self.random_gen.integers(1, 7)
+        self.die = self.random_gen.integers(1, 7, dtype=np.int16)
         self.board = logic.get_board(3, 3)
         self.previous_die = self.die
         self.previous_board = self.board.copy()
