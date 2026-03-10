@@ -29,6 +29,11 @@ def _observation_space() -> gym.spaces.Dict:
     return gym.spaces.Dict(obs_dict)
 
 
+@cache
+def _action_space() -> gym.spaces.Discrete:
+    return gym.spaces.Discrete(3)
+
+
 class raw_env(AECEnv):  # noqa: N801
     """
     Knucklebones game environment using AEC API.
@@ -119,3 +124,15 @@ class raw_env(AECEnv):  # noqa: N801
             current board state.
         """
         return _observation_space()
+
+    def action_space(self, agent: str = "player_0") -> gym.spaces.Discrete:  # noqa: ARG002
+        """
+        Get the action space for the specified agent.
+
+        In this implementation, the action space is the same for both agents and
+            consists of three discrete actions:
+        - 0: Place the die in the left column.
+        - 1: Place the die in the middle column.
+        - 2: Place the die in the right column.
+        """
+        return _action_space()
