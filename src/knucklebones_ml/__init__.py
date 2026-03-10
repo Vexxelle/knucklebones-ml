@@ -1,11 +1,10 @@
 r"""
 Knucklebones ML - Machine learning module for dice game \"Knucklebones\".
 
-This package provides:
- - A PettingZoo environment with render functionality
- - Different Knucklebones Bot implementations.
+This package provides a PettingZoo environment with render functionality.
 """
 
-from knucklebones_ml import env
+import knucklebones_ml.env.core_logic as logic
+from knucklebones_ml.env import env, raw_env
 
-__all__ = ["env"]
+__all__ = ["env", "logic", "raw_env"]
