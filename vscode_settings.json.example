@@ -1,0 +1,23 @@
+{
+  "files.exclude": {
+    "*cache": true,
+    "**/__pycache__": true, 
+    ".venv": true,
+    ".python-version": true,
+    "uv.lock": true,
+    ".coverage": true
+  },
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "github.copilot.chat.codeGeneration.useInstructionFiles": false
+}
