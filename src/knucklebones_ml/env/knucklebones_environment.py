@@ -137,6 +137,10 @@ class raw_env(AECEnv):  # noqa: N801
         }
 
     def render(self):
+        if self.render_mode:
+            raise NotImplementedError
+
+    def close(self):
         pass
 
     def observation_space(self, agent: str = "player_0") -> gym.spaces.Dict:  # noqa: ARG002
