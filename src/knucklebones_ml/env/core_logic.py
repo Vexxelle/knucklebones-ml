@@ -10,12 +10,14 @@ This module contains vectorized numpy functions for:
  - Applying a turn action to the board
 """
 
+from typing import SupportsInt
+
 import numpy as np
 
 
-def get_board(size_x: int, size_y: int) -> np.ndarray:
+def get_board(size_x: SupportsInt, size_y: SupportsInt) -> np.ndarray:
     """Initialize a 3D numpy array representing game board with dimensions (2, x, y)."""
-    return np.zeros((2, size_x, size_y), dtype=int)
+    return np.zeros((2, int(size_x), int(size_y)), dtype=np.int16)
 
 
 def evaluate_column_scores(board: np.ndarray) -> np.ndarray:
@@ -31,7 +33,7 @@ def evaluate_column_scores(board: np.ndarray) -> np.ndarray:
         calculated scores for each player's columns.
 
     """
-    scores = np.zeros((2, board.shape[2]), dtype=int)
+    scores = np.zeros((2, board.shape[2]), dtype=np.int16)
     for die in range(1, 7):
         column_counts = (board == die).sum(axis=1)
         scores += die * column_counts**2
@@ -46,7 +48,7 @@ def evaluate_board_scores(board: np.ndarray) -> np.ndarray:
         A 1D numpy array of length 2 containing the scores for each player.
 
     """
-    scores = np.zeros(2, dtype=int)
+    scores = np.zeros(2, dtype=np.int16)
     for die in range(1, 7):
         column_counts = (board == die).sum(axis=1)
         scores += (die * column_counts**2).sum(axis=1)
@@ -58,15 +60,17 @@ def get_valid_actions(board: np.ndarray) -> np.ndarray:
     Determine valid actions for the current board state.
 
     Returns:
-        A 1D numpy array of integers where each index represents a column and the value
+        A 2D numpy array of integers where each index represents a column and the value
         is 1 if the column is a valid action (has empty space), 0 otherwise.
 
     """
-    valid_actions = (board[:, 0, :] == 0).astype(int).tolist()
+    valid_actions = (board[:, 0, :] == 0).astype(np.int8)
     return valid_actions
 
 
-def apply_action(die: int, board: np.ndarray, side: int, action: int) -> np.ndarray:
+def apply_action(
+    die: SupportsInt, board: np.ndarray, side: SupportsInt, action: SupportsInt
+) -> np.ndarray:
     """
     Apply a die placement action to the game board.
 
@@ -89,6 +93,11 @@ def apply_action(die: int, board: np.ndarray, side: int, action: int) -> np.ndar
                    the die placement.
 
     """
+    # Normalize inputs
+    die = int(die)
+    side = int(side)
+    action = int(action)
+
     board_side = board[side]
     # Find the lowest empty cell in the specified column
     col = board_side[:, action]
@@ -108,7 +117,7 @@ def apply_action(die: int, board: np.ndarray, side: int, action: int) -> np.ndar
 
     # Reconstruct the column: Zeros on top, remaining dice on bottom
     enemy_side[:, action] = np.concatenate(
-        [np.zeros(num_zeros, dtype=int), remaining_dice],
+        [np.zeros(num_zeros, dtype=np.int16), remaining_dice],
     )
 
     return board
