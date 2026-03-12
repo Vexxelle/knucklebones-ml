@@ -7,5 +7,6 @@ base class for the user interface and specific implementations.
 """
 
 from knucklebones_ml.ui._base_class import BaseUI
+from knucklebones_ml.ui._basic_terminal_renderer import BasicRenderer
 
-__all__ = ["BaseUI"]
+__all__ = ["BaseUI", "BasicRenderer"]
