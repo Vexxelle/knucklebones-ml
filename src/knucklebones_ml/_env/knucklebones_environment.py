@@ -17,7 +17,7 @@ import numpy as np
 from pettingzoo import AECEnv
 from pettingzoo.utils import AgentSelector, wrappers
 
-from . import core_logic as logic
+from knucklebones_ml._env import core_logic as logic
 
 
 @cache
