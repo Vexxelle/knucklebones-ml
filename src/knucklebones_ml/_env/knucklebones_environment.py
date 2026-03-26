@@ -166,8 +166,10 @@ class raw_env(AECEnv):  # noqa: N801
             final_scores = logic.evaluate_board_scores(self.board)
             if final_scores[side] > final_scores[1 - side]:
                 played_reward += 10 * abs_score  # Win
+                idle_reward -= 10 * abs_score  # Opponent Loss
             elif final_scores[side] < final_scores[1 - side]:
                 played_reward -= 10 * abs_score  # Loss
+                idle_reward += 10 * abs_score  # Opponent Win
             self.terminations = dict.fromkeys(self.agents, True)
 
         if time_out:
