@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from knucklebones_ml.env import core_logic as logic
+from knucklebones_ml import logic
 
 
 def test_get_board():
