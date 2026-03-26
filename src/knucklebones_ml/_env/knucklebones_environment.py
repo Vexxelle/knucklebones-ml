@@ -40,9 +40,9 @@ def env(render_mode: str | None = None) -> AECEnv:
     Create a new instance of the Knucklebones environment.
 
     Args:
-        render_mode (str | None): String specifying the rendering mode
-            (human or ansi) for the environment.
-            If not provided, defaults to None (no rendering).
+        render_mode (str | None): For compatibility only, use knucklebones_ml.ui
+            Renderers instead. String specifying the rendering mode (human or ansi)
+            for the environment. If not provided, defaults to None (no rendering).
 
     Returns:
         AECEnv: A wrapped instance of the Knucklebones environment.
@@ -207,7 +207,11 @@ class raw_env(AECEnv):  # noqa: N801
         }
 
     def render(self) -> None:
-        """Render the current state of the environment."""
+        """
+        Print the current state of the environment.
+
+        For compatibility only, use knucklebones_ml.ui Renderers instead.
+        """
         if not self.render_mode:
             gym.logger.warn(
                 "You are calling render method without specifying any render mode."
