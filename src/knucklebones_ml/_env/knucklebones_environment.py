@@ -50,6 +50,9 @@ def env(render_mode: str | None = None) -> AECEnv:
     """
     env = raw_env(render_mode=render_mode)
 
+    if render_mode is not None:
+        env = wrappers.CaptureStdoutWrapper(env)
+
     env = wrappers.TerminateIllegalWrapper(env, illegal_reward=-10)
     env = wrappers.AssertOutOfBoundsWrapper(env)
     env = wrappers.OrderEnforcingWrapper(env)
@@ -160,7 +163,7 @@ class raw_env(AECEnv):  # noqa: N801
 
         # Long Term Reward (win/loss)
         board_full = logic.board_is_full(self.board)
-        time_out = self.timestep >= (self.options["max_steps"] or float("inf"))
+        time_out = self.timestep + 1 >= (self.options["max_steps"] or float("inf"))
 
         if board_full:
             final_scores = logic.evaluate_board_scores(self.board)
