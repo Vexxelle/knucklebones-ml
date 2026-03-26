@@ -182,16 +182,18 @@ class BasicRenderer(BaseUI):
             truncated (bool): Whether the game has been truncated.
 
         """
-        board = obs["board"]
+        board = obs["board"].copy()
         die = obs["die"]
+        if truncated or terminated:
+            die = None
         if self.flip_board and player == self.players[1]:
             board = np.flipud(board)
 
         other_player = self.players[1] if player == self.players[0] else self.players[0]
 
-        if last_action:
+        if last_action is not None:
             print(
-                f"{other_player} placed a {self.last_die} on row {int(last_action) + 1}."  # noqa: E501
+                f"{other_player} placed a {self.last_die} on column {int(last_action) + 1}."  # noqa: E501
             )
             print(delimiter())
             if not terminated and not truncated:
@@ -221,11 +223,11 @@ class BasicRenderer(BaseUI):
 
             scores = logic.evaluate_board_scores(board).tolist()
             if scores[0] > scores[1]:
-                print(f"{self.players[0]} wins with {scores[0]} points!")
+                print(f"{self.players[0]} wins with {scores[0]} points!".center(40))
             elif scores[1] > scores[0]:
-                print(f"{self.players[1]} wins with {scores[1]} points!")
+                print(f"{self.players[1]} wins with {scores[1]} points!".center(40))
             else:
-                print(f"It's a tie! Both players have {scores[0]} points!")
+                print(f"It's a tie! Both players have {scores[0]} points!".center(40))
             print(delimiter("=", pad_down=3))
 
         self.last_die = die
@@ -241,7 +243,7 @@ class BasicRenderer(BaseUI):
         try:
             position = int(
                 input(
-                    "Please enter the row number (1-3) where you want to place your die:\n"  # noqa: E501
+                    "Please enter the column number (1-3) where you want to place your die:\n"  # noqa: E501
                 )
             )
 
