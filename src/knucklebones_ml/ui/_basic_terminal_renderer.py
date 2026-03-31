@@ -62,7 +62,7 @@ def player_box_top(player_name: str, board: np.ndarray, die: int | None) -> str:
 
     space = 11
     if len(player_name) > space:
-        player_name = player_name[: space - 1] + "."
+        player_name = player_name[: space - 1] + "_"
 
     def center(space: int, text: str) -> str:
         rest = space - len(text)
@@ -88,7 +88,7 @@ def player_box_bottom(player_name: str, board: np.ndarray, die: int | None) -> s
 
     space = 11
     if len(player_name) > space:
-        player_name = player_name[: space - 1] + "."
+        player_name = player_name[: space - 1] + "_"
 
     def center(space: int, text: str) -> str:
         rest = space - len(text)
@@ -255,26 +255,3 @@ class BasicRenderer(BaseUI):
         except ValueError:
             print("Invalid input. Please enter a number between 1 and 3.")
             return self.get_human_action(player, action_mask)
-
-
-if __name__ == "__main__":
-    board = np.arange(18).clip(0, 6).reshape(2, 3, 3)
-    die = 6
-    last_action = None
-    player_names = ("Gluipi", "Blario")
-    flip_board = True
-    terminated, truncated = False, False
-    obs = {"board": board, "die": die}
-
-    br = BasicRenderer(player_names, flip_board=flip_board)
-
-    br.render(obs, "Gluipi", last_action, terminated, truncated)
-
-    action_mask = np.array([1, 0, 0])
-    i = br.get_human_action("Gluipi", action_mask)
-    a = logic.apply_action(die, board, 0, i)
-
-    obs = {"board": a, "die": die}
-    last_action = i
-    terminated = True
-    br.render(obs, "Blario", last_action, terminated, truncated)

@@ -1,5 +1,8 @@
 import sys
 from io import StringIO
+from unittest.mock import patch
+
+import numpy as np
 
 from knucklebones_ml.ui import BasicRenderer
 
@@ -96,7 +99,7 @@ Alice goes first! They rolled a 1.
 
 
 def test_render_game_over(sample_board_full):
-    renderer = BasicRenderer(players=("Alice", "Bob"))
+    renderer = BasicRenderer(players=("Alice the Great", "Bob"))
     renderer.last_die = 3  # Simulate the last die rolled
     obs = {"board": sample_board_full, "die": 6}
     player, last_action, terminated, truncated = "Bob", 2, True, False
@@ -105,13 +108,13 @@ def test_render_game_over(sample_board_full):
     renderer.render(obs, player, last_action, terminated, truncated)
 
     expected_output = """\
-Alice placed a 3 on column 3.
+Alice the Great placed a 3 on column 3.
 
   ----------------------------------------  
 
                  1   2   3                 
                ┌───┬───┬───┐  ╔═══════════╗
-               │ 1 │ 2 │ 3 │  ║   Alice   ║
+               │ 1 │ 2 │ 3 │  ║Alice the _║
                ├───┼───┼───┤  ║    38     ║
                │ 4 │ 5 │ 6 │  ╬═══════════╬
                ├───┼───┼───┤  ║           ║
@@ -145,4 +148,38 @@ Alice placed a 3 on column 3.
         sys.stdout = sys.__stdout__  # Reset stdout to default
 
 
-# TODO: Add tests for human input handling and flipped board rendering
+def test_render_game_terminated_noflip(sample_board_mixed):
+    renderer = BasicRenderer(players=("Alice", "Bob"), flip_board=False)
+    renderer.last_die = 3  # Simulate the last die rolled
+    obs = {"board": sample_board_mixed, "die": 6}
+    player, last_action, terminated, truncated = "Bob", 2, False, True
+
+    sys.stdout = StringIO()
+    renderer.render(obs, player, last_action, terminated, truncated)
+
+    expected_output_slice = """\
+
+  ========================================  
+
+            Game Truncated!             
+       Alice wins with 53 points!       
+
+  ========================================  
+
+
+
+"""  # noqa: W291
+    try:
+        assert expected_output_slice in sys.stdout.getvalue()
+    finally:
+        sys.stdout = sys.__stdout__  # Reset stdout to default
+
+
+def test_user_input():
+    renderer = BasicRenderer(players=("Alice", "Bob"))
+
+    with patch("builtins.input", return_value=["6", "Banana", "2", "3"]):
+        expected_action = 2  # Function should keep asking until a valid input is given
+        action = renderer.get_human_action("Alice", np.array([1, 0, 1]))
+
+        assert action == expected_action
