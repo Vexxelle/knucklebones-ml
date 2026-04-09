@@ -178,7 +178,7 @@ def test_render_game_terminated_noflip(sample_board_mixed):
 def test_user_input():
     renderer = BasicRenderer(players=("Alice", "Bob"))
 
-    with patch("builtins.input", return_value=["6", "Banana", "2", "3"]):
+    with patch("builtins.input", side_effect=["6", "Banana", "2", "3"]):
         expected_action = 2  # Function should keep asking until a valid input is given
         action = renderer.get_human_action("Alice", np.array([1, 0, 1]))
 

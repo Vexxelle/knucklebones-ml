@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Literal, cast
 from unittest.mock import patch
 
 import numpy as np
@@ -18,7 +18,7 @@ def test_api_step(sample_board_empty):
     die_value = 2
 
     agent_iter = iter(env.agent_iter())
-    obs: dict[str, Any] = env.last()[0]  # ty:ignore[invalid-assignment]
+    obs = env.last()[0]
 
     assert obs["die"] == die_value
     assert np.array_equal(obs["board"], sample_board_empty)
@@ -28,14 +28,14 @@ def test_api_step(sample_board_empty):
     action = 0
     env.step(action)
 
-    obs: dict[str, Any] = env.last()[0]  # ty:ignore[invalid-assignment]
+    obs = env.last()[0]
     assert obs["die"] == die_value
     assert not np.array_equal(obs["board"], sample_board_empty)
 
     action = 0
     env.step(action)
 
-    obs: dict[str, Any] = env.last()[0]  # ty:ignore[invalid-assignment]
+    obs = env.last()[0]
 
     # fmt: off
     expected_board = np.array([[[0, 0, 0],
@@ -76,12 +76,17 @@ def test_api_render_no_mode():
         )
 
 
+def to_action(i):
+    return cast("Literal[0, 1, 2]", i)
+
+
 def test_api_truncation():
     env = knucklebones_ml.env()
     options = {"max_steps": 5}
     env.reset(options=options)
     for i in range(4):
-        env.step(i % 3)
+        action = to_action(i % 3)
+        env.step(action)
     truncation = env.last()[3]
     assert not truncation  # truncated flag should be False before 5 steps
     env.step(0)
