@@ -154,8 +154,8 @@ def concatenate_elements(
     return output
 
 
-class BasicRenderer(BaseUI):
-    """A basic terminal renderer for the Knucklebones game."""
+class TerminalUI(BaseUI):
+    """A basic terminal interface for the Knucklebones game."""
 
     def __init__(self, players: tuple[str, str], *, flip_board: bool = False) -> None:
         super().__init__(players)

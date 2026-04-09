@@ -8,10 +8,10 @@ def main() -> None:
 
     # Player names need to be mapped to agent names returned by the environment
     player_mapping = {"player_0": p1_name, "player_1": p2_name}
+    player_names = (p1_name, p2_name)
 
     # Create a terminal renderer instance
-    player_names = (p1_name, p2_name)
-    renderer = kb.ui.BasicRenderer(players=player_names)
+    renderer = kb.ui.TerminalUI(players=player_names)
 
     env = kb.env()
     env.reset()

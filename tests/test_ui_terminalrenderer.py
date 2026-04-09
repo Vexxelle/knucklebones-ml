@@ -4,16 +4,16 @@ from unittest.mock import patch
 
 import numpy as np
 
-from knucklebones_ml.ui import BasicRenderer
+from knucklebones_ml.ui import TerminalUI
 
 
 def test_initialization():
-    renderer = BasicRenderer(players=("Alice", "Bob"))
+    renderer = TerminalUI(players=("Alice", "Bob"))
     assert renderer.players == ("Alice", "Bob")
 
 
 def test_render_normal(sample_board_mixed):
-    renderer = BasicRenderer(players=("Alice", "Bob"))
+    renderer = TerminalUI(players=("Alice", "Bob"))
     renderer.last_die = 3  # Simulate the last die rolled
     obs = {"board": sample_board_mixed, "die": 3}
     player, last_action, terminated, truncated = "Alice", 1, False, False
@@ -54,7 +54,7 @@ Alice is up!
 
 
 def test_render_start_of_game(sample_board_empty):
-    renderer = BasicRenderer(players=("Alice", "Bob"))
+    renderer = TerminalUI(players=("Alice", "Bob"))
     obs = {"board": sample_board_empty, "die": 1}
     player, last_action, terminated, truncated = "Alice", None, False, False
 
@@ -99,7 +99,7 @@ Alice goes first! They rolled a 1.
 
 
 def test_render_game_over(sample_board_full):
-    renderer = BasicRenderer(players=("Alice the Great", "Bob"))
+    renderer = TerminalUI(players=("Alice the Great", "Bob"))
     renderer.last_die = 3  # Simulate the last die rolled
     obs = {"board": sample_board_full, "die": 6}
     player, last_action, terminated, truncated = "Bob", 2, True, False
@@ -149,7 +149,7 @@ Alice the Great placed a 3 on column 3.
 
 
 def test_render_game_terminated_noflip(sample_board_mixed):
-    renderer = BasicRenderer(players=("Alice", "Bob"), flip_board=False)
+    renderer = TerminalUI(players=("Alice", "Bob"), flip_board=False)
     renderer.last_die = 3  # Simulate the last die rolled
     obs = {"board": sample_board_mixed, "die": 6}
     player, last_action, terminated, truncated = "Bob", 2, False, True
@@ -176,7 +176,7 @@ def test_render_game_terminated_noflip(sample_board_mixed):
 
 
 def test_user_input():
-    renderer = BasicRenderer(players=("Alice", "Bob"))
+    renderer = TerminalUI(players=("Alice", "Bob"))
 
     with patch("builtins.input", side_effect=["6", "Banana", "2", "3"]):
         expected_action = 2  # Function should keep asking until a valid input is given
