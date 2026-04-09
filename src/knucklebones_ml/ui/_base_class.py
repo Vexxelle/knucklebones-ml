@@ -1,4 +1,4 @@
-from typing import SupportsInt
+from typing import Literal, SupportsInt
 
 import numpy as np
 
@@ -41,12 +41,14 @@ class BaseUI:
 
         """
 
-    def get_human_action(self, player: str, action_mask: np.ndarray) -> SupportsInt:
+    def get_human_action(
+        self, player: str, action_mask: np.ndarray
+    ) -> Literal[0, 1, 2]:
         """
         Get an action from the user.
 
         Returns:
-            SupportsInt: The action chosen by the user.
+            Literal[0, 1, 2]: The action chosen by the user.
 
         """
         msg = "The get_human_action method needs to be implemented by subclasses."

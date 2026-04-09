@@ -1,4 +1,4 @@
-from typing import SupportsInt
+from typing import Literal, SupportsInt, cast
 
 import numpy as np
 
@@ -232,12 +232,14 @@ class BasicRenderer(BaseUI):
 
         self.last_die = die
 
-    def get_human_action(self, player: str, action_mask: np.ndarray) -> SupportsInt:
+    def get_human_action(
+        self, player: str, action_mask: np.ndarray
+    ) -> Literal[0, 1, 2]:
         """
         Get an action from the user.
 
         Returns:
-            SupportsInt: The action chosen by the user.
+            Literal[0, 1, 2]: The action chosen by the user.
 
         """
         try:
@@ -251,7 +253,7 @@ class BasicRenderer(BaseUI):
             if max_v < position or position < min_v or action_mask[position - 1] == 0:
                 raise ValueError  # noqa: TRY301
 
-            return position - 1
+            return cast("Literal[0, 1, 2]", position - 1)
         except ValueError:
             print("Invalid input. Please enter a number between 1 and 3.")
             return self.get_human_action(player, action_mask)
