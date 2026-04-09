@@ -6,6 +6,6 @@ core game logic and example agents.
 """
 
 from knucklebones_ml import agents, ui
-from knucklebones_ml._env import env, logic, raw_env
+from knucklebones_ml._env import KnucklebonesEnv, env, logic
 
-__all__ = ["agents", "env", "logic", "raw_env", "ui"]
+__all__ = ["KnucklebonesEnv", "agents", "env", "logic", "ui"]

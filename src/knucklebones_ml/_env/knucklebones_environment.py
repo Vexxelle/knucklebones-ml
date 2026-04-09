@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections import defaultdict
 from copy import copy
 from functools import cache
-from typing import Literal
+from typing import Any, Literal, overload
 
 import gymnasium as gym
 import numpy as np
@@ -35,7 +35,7 @@ def _action_space() -> gym.spaces.Discrete:
     return gym.spaces.Discrete(3)
 
 
-def env(render_mode: str | None = None) -> AECEnv:
+def env(render_mode: str | None = None) -> KnucklebonesEnv:
     """
     Create a new instance of the Knucklebones environment.
 
@@ -45,10 +45,10 @@ def env(render_mode: str | None = None) -> AECEnv:
             for the environment. If not provided, defaults to None (no rendering).
 
     Returns:
-        AECEnv: A wrapped instance of the Knucklebones environment.
+        KnucklebonesEnv: A wrapped instance of the Knucklebones environment.
 
     """
-    env = raw_env(render_mode=render_mode)
+    env = KnucklebonesEnv(render_mode=render_mode)
 
     if render_mode is not None:
         env = wrappers.CaptureStdoutWrapper(env)
@@ -57,10 +57,10 @@ def env(render_mode: str | None = None) -> AECEnv:
     env = wrappers.AssertOutOfBoundsWrapper(env)
     env = wrappers.OrderEnforcingWrapper(env)
 
-    return env
+    return env  # ty:ignore[invalid-return-type]
 
 
-class raw_env(AECEnv):  # noqa: N801
+class KnucklebonesEnv(AECEnv):
     """
     Knucklebones game environment using AEC API.
 
@@ -230,6 +230,31 @@ class raw_env(AECEnv):  # noqa: N801
 
     def close(self) -> None:
         """Close the environment and release any resources."""
+
+    # Overloads for the last() method so ty understands last() usually returns a dict
+
+    @overload
+    def last(
+        self, observe: Literal[True] = True
+    ) -> tuple[dict[str, Any], float, bool, bool, dict[str, Any]]: ...
+
+    @overload
+    def last(
+        self, observe: Literal[False]
+    ) -> tuple[None, float, bool, bool, dict[str, Any]]: ...
+
+    def last(
+        self, observe: bool = True
+    ) -> tuple[dict[str, Any] | None, float, bool, bool, dict[str, Any]]:  # ty:ignore[invalid-method-override]
+        """Return observation, cumulative reward, terminated, truncated, info for the current agent (specified by self.agent_selection)."""  # noqa: E501
+        observation = self.observe(self.agent_selection) if observe else None
+        return (
+            observation,
+            self._cumulative_rewards[self.agent_selection],
+            self.terminations[self.agent_selection],
+            self.truncations[self.agent_selection],
+            self.infos[self.agent_selection],
+        )
 
     def observation_space(self, agent: str = "player_0") -> gym.spaces.Dict:  # noqa: ARG002
         """
