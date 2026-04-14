@@ -3,7 +3,7 @@ from typing import Literal, SupportsInt, cast
 import numpy as np
 
 from knucklebones_ml._env import core_logic as logic
-from knucklebones_ml.ui._base_class import BaseUI
+from knucklebones_ml.ui._base_class import UserInterface
 
 
 def delimiter(
@@ -154,7 +154,7 @@ def concatenate_elements(
     return output
 
 
-class TerminalUI(BaseUI):
+class TerminalUI(UserInterface):
     """A basic terminal interface for the Knucklebones game."""
 
     def __init__(self, players: tuple[str, str], *, flip_board: bool = False) -> None:

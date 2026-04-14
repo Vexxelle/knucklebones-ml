@@ -3,7 +3,7 @@ from typing import Literal, SupportsInt
 import numpy as np
 
 
-class BaseUI:
+class UserInterface:
     """Base class for the user interface of the Knucklebones game."""
 
     def __init__(self, players: tuple[str, str]) -> None:
