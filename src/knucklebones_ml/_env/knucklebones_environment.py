@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections import defaultdict
 from copy import copy
 from functools import cache
-from typing import Any, Literal, overload
+from typing import Any, Literal, cast, overload
 
 import gymnasium as gym
 import numpy as np
@@ -114,7 +114,7 @@ class KnucklebonesEnv(AECEnv):
         self._agent_selector = AgentSelector(self.agents)
         self.agent_selection = self._agent_selector.next()
 
-    def step(self, action: Literal[0, 1, 2]) -> None:
+    def step(self, action: Literal[0, 1, 2] | None) -> None:
         """
         Apply the specified action for the current agent and update environment state.
 
@@ -132,6 +132,8 @@ class KnucklebonesEnv(AECEnv):
         ):
             self._was_dead_step(action)
             return
+
+        action = cast("Literal[0, 1, 2]", action)
 
         side = self.possible_agents.index(self.agent_selection)
 
@@ -215,7 +217,7 @@ class KnucklebonesEnv(AECEnv):
         """
         Print the current state of the environment.
 
-        For compatibility only, use knucklebones_ml.ui Renderers instead.
+        For compatibility only. Use knucklebones_ml.ui Renderers instead.
         """
         if not self.render_mode:
             gym.logger.warn(
