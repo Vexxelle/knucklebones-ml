@@ -1,7 +1,7 @@
 from typing import Any, Literal
 
 
-class BaseAgent:
+class Agent:
     def __init__(self, seed: int | None = None) -> None:
         pass
 

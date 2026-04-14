@@ -2,10 +2,10 @@ from typing import Any, Literal
 
 from numpy.random import default_rng
 
-from knucklebones_ml.agents._base_class import BaseAgent
+from knucklebones_ml.agents._base_class import Agent
 
 
-class RandomAgent(BaseAgent):
+class RandomAgent(Agent):
     def __init__(self, seed: int | None = None) -> None:
         self.rng = default_rng(seed)
 
