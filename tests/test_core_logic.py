@@ -41,7 +41,7 @@ def test_get_valid_actions(sample_board_empty, sample_board_full, sample_board_m
 
 def test_apply_action(sample_board_empty):
     board = logic.apply_action(3, sample_board_empty.copy(), 0, 1)
-    assert board[0, 2, 1] == 3  # noqa: PLR2004
+    assert board[0, 2, 1] == 3
     assert np.all(board[1] == 0)
 
     board = logic.apply_action(3, board, 1, 2)
