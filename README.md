@@ -1,32 +1,55 @@
 
-This is a Python implementation of the dice game **Knucklebones** from Cult of the Lamb with multiple AI player strategies.
+# Knucklebones ML
 
-## Game Mechanics
+This is a Python PettingZoo implementation of the dice game "Knucklebones" from the video game Cult of the Lamb.
 
-game.py implements the core game:
-- **Board**: 3 rows per player, max 3 dice per row
-- **Scoring**: Sum of (die value × count of that die in the row)
-- **Placement**: Placing a die removes all opponent dice of the same value from that row
-- **Win condition**: First player to fill all 9 slots (3 rows × 3 dice) ends the game, higher score wins
+## Features
+- PVP, PVAI, and AI vs AI game modes
+- Multiple AI agents with different strategies
+- Multiple rendering options with human input support
+- Simulation of multiple games to gather statistics
+- Easy to extend with new agents or game rules
 
-## Player Strategies
-
-players.py contains 8 different AI implementations:
-
-| Player | Strategy |
-|--------|----------|
-| **Human_Player** | Interactive console input |
-| **Random_Player** | Random valid row selection |
-| **Sequential_Player** | Always fills rows left to right |
-| **Aggressive_Player** | Removes opponent dice aggressively |
-| **Smart_Player** | Maximizes own score advantage |
-| **Stupid_Player** | Minimizes own score (opposite of Smart) |
-| **Combo_Player** | Prioritizes matching dice in own rows |
-| **Pupser** | Complex heuristic combining deletion, combos, and scoring |
+## Requirements
+- Python 3.12
+- uv (or pip, if you must)
 
 ## Usage
+1. Clone the repository:
+```bash
+git clone https://github.com/Vexxelle/knucklebones-ml.git
+```
 
-- **main.py**: Interactive game mode (human vs bot or human vs human)
-- **matchup_statisctics.py**: Runs 10,000 matches between all player pairs and outputs win rates
+2. Navigate to the project directory:
+```bash
+cd knucklebones-ml
+```
 
-The project helps analyze which AI strategies perform best against each other.
+3. 
+- Run any of the example scripts to see the game in action:
+```bash
+uv run examples/pvp_terminal_play.py
+```
+- Or install the package and use it in your own code:
+```bash
+uv pip install -e .
+```
+
+Or if you prefer pip:
+- Activate your virtual environment (optional but recommended):
+```bash
+.venv\Scripts\activate.bat  # On Windows (cmd/powershell)
+source .venv/bin/activate  # On Unix or MacOS (bash/zsh)
+```
+- Install the dependencies:
+```bash
+pip install -r requirements.txt
+```
+- Run any of the example scripts:
+```bash
+python examples/pvp_terminal_play.py
+```
+- Or install the package:
+```bash
+pip install -e .
+```
