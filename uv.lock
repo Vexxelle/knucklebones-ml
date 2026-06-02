@@ -186,6 +186,7 @@ source = { editable = "." }
 dependencies = [
     { name = "blessed" },
     { name = "numpy" },
+    { name = "pandas" },
     { name = "pettingzoo" },
 ]
 
@@ -203,6 +204,7 @@ examples = [
 requires-dist = [
     { name = "blessed", specifier = ">=1.30.0" },
     { name = "numpy", specifier = ">=2.4.2" },
+    { name = "pandas", specifier = ">=3.0.3" },
     { name = "pettingzoo", specifier = ">=1.25.0" },
 ]
 
