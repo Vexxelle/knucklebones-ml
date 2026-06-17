@@ -20,6 +20,9 @@ dev = [
     "pytest-cov>=7.0.0",
     "ruff>=0.15.1",
 ]
+examples = [
+    "pandas>=3.0.3",
+]
 
 [tool.ruff]
 target-version = "py312"

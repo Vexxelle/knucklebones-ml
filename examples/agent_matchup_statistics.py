@@ -1,165 +1,118 @@
+from dataclasses import dataclass, field
 from pprint import pprint
-from typing import Any
 
 import numpy as np
+import pandas as pd
 
 from knucklebones_ml import agents, env, logic
 
 
-def get_matchup_statistics(
-    agent1: agents.Agent, agent2: agents.Agent, num_games: int = 1000
-) -> dict[str, Any]:
+@dataclass
+class SimulationHistory:
+    game_id: list[int] = field(default_factory=list)
+    turn_number: list[int] = field(default_factory=list)
+
+    a1_score: list[int] = field(default_factory=list)
+    a2_score: list[int] = field(default_factory=list)
+
+    die: list[int] = field(default_factory=list)
+    action: list[int | None] = field(default_factory=list)
+
+    board: list[np.ndarray] = field(default_factory=list)
+
+    def to_dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame(
+            {
+                "game_id": self.game_id,
+                "turn_number": self.turn_number,
+                "a1_score": self.a1_score,
+                "a2_score": self.a2_score,
+                "die": self.die,
+                "action": self.action,
+                "board": self.board,
+            }
+        )
+
+
+def simulate_matchup(
+    agent1: agents.Agent,
+    agent2: agents.Agent,
+    num_games: int = 1000,
+    max_steps: int | None = None,
+) -> SimulationHistory:
     """
-    Compute the matchup statistics between two agents.
+    Simulate matches between two agents.
 
     Args:
         agent1 (agents.Agent): The first agent.
         agent2 (agents.Agent): The second agent.
-        num_games (int, optional): The number of games to simulate. Defaults to 1000.
+        num_games (int, optional): The number of games to simulate.
+            Must be at least 1. Defaults to 1000.
 
     Returns:
-        dict[str, float | int]: A dictionary containing the matchup statistics,
-        including, for each agent:
-            "agent1_wins", "draws", "total_games", "agent1_best_game",
-            "agent1_average_winning_reward", "agent1_average_losing_reward",
-            "agent1_winning_dice", "agent1_losing_dice", and the same for "agent2".
+        SimulationHistory: An object containing the matchup results.
 
     """
 
-    stats: dict[str, Any] = {
-        "agent1_wins": 0,
-        "agent2_wins": 0,
-        "draws": 0,
-        "total_games": num_games,
-        "agent1_best_game": None,
-        "agent2_best_game": None,
-        "agent1_winning_dice": {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0},
-        "agent2_winning_dice": {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0},
-        "agent1_losing_dice": {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0},
-        "agent2_losing_dice": {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0},
-    }
+    if num_games < 1:
+        msg = "num_games must be at least 1"
+        raise ValueError(msg)
 
+    stats: SimulationHistory = SimulationHistory()
     game_env = env()
-    for _ in range(num_games):
-        game_env.reset()
 
-        rounds_played = 0
-        agent1_dice = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
-        agent2_dice = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+    options = {"max_steps": max_steps} if max_steps is not None else {}
 
-        last_board = np.array([])
+    for game_id in range(num_games):
+        game_env.reset(options=options)
 
-        for agent in game_env.agent_iter():
+        turn_number = 0
+        agent1_dice = [0, 0, 0, 0, 0, 0]
+        agent2_dice = [0, 0, 0, 0, 0, 0]
+
+        last_state_saved = False
+
+        for turn_number, agent in enumerate(game_env.agent_iter()):
             obs, _, terminated, truncated, _ = game_env.last()
 
             if terminated or truncated:
-                last_board = obs["board"]
                 action = None
 
             elif agent == "player_0":
                 action = agent1.select_action(obs)
-                rounds_played += 1
-                agent1_dice[obs["die"]] += 1
+                agent1_dice[obs["die"] - 1] += 1
             else:
                 action = agent2.select_action(obs)
-                agent2_dice[obs["die"]] += 1
+                agent2_dice[obs["die"] - 1] += 1
+
+            if action is None:
+                print(f"Game {game_id} ended at turn {turn_number}.")
+
+            if action is not None or not last_state_saved:
+                stats.game_id.append(game_id)
+                stats.turn_number.append(turn_number)
+
+                scores = logic.evaluate_board_scores(obs["board"])
+                stats.a1_score.append(scores[0])
+                stats.a2_score.append(scores[1])
+
+                stats.die.append(obs["die"])
+                stats.action.append(action)
+                stats.board.append(obs["board"])
+
+                if action is None:
+                    last_state_saved = True
 
             game_env.step(action)
 
-        scores = logic.evaluate_board_scores(last_board)
-        if scores[0] > scores[1]:
-            stats["agent1_wins"] += 1
-
-            if stats["agent1_best_game"] is None:
-                stats["agent1_best_game"] = scores
-            else:
-                rel_score = scores[0] - scores[1]
-                best_game = stats["agent1_best_game"]
-                best_rel_score = best_game[0] - best_game[1]
-                if rel_score > best_rel_score:
-                    stats["agent1_best_game"] = scores
-
-            for die_value in range(1, 6 + 1):
-                stats["agent1_winning_dice"][die_value] += agent1_dice[die_value]
-                stats["agent2_losing_dice"][die_value] += agent2_dice[die_value]
-
-        elif scores[1] > scores[0]:
-            stats["agent2_wins"] += 1
-
-            if stats["agent2_best_game"] is None:
-                stats["agent2_best_game"] = scores
-            else:
-                rel_score = scores[1] - scores[0]
-                best_game = stats["agent2_best_game"]
-                best_rel_score = best_game[1] - best_game[0]
-                if rel_score > best_rel_score:
-                    stats["agent2_best_game"] = scores
-
-            for die_value in range(1, 6 + 1):
-                stats["agent2_winning_dice"][die_value] += agent2_dice[die_value]
-                stats["agent1_losing_dice"][die_value] += agent1_dice[die_value]
-
-        else:
-            stats["draws"] += 1
-
     return stats
-
-
-def add_averaged_stats(stats: dict[str, Any]) -> dict[str, Any]:
-    """
-    Average out the statistics by the total number of games.
-
-    Args:
-        stats (dict[str, Any]): The statistics to average out.
-
-    Returns:
-        dict[str, Any]: stats + the averaged out statistics.
-    """
-
-    averaged_stats: dict[str, Any] = stats.copy()
-    total_games = stats["total_games"]
-    agent1_wins = stats["agent1_wins"]
-    agent2_wins = stats["agent2_wins"]
-
-    averaged_stats["agent1_win_rate"] = agent1_wins / total_games
-    averaged_stats["agent2_win_rate"] = agent2_wins / total_games
-    averaged_stats["draw_rate"] = stats["draws"] / total_games
-
-    averaged_stats["agent1_averaged_winning_dice"] = {}
-    averaged_stats["agent2_averaged_winning_dice"] = {}
-    averaged_stats["agent1_averaged_losing_dice"] = {}
-    averaged_stats["agent2_averaged_losing_dice"] = {}
-
-    for die_value in range(1, 6 + 1):
-        averaged_stats["agent1_averaged_winning_dice"][die_value] = (
-            stats["agent1_winning_dice"][die_value] / agent1_wins
-            if agent1_wins > 0
-            else 0
-        )
-        averaged_stats["agent2_averaged_winning_dice"][die_value] = (
-            stats["agent2_winning_dice"][die_value] / agent2_wins
-            if agent2_wins > 0
-            else 0
-        )
-        averaged_stats["agent1_averaged_losing_dice"][die_value] = (
-            stats["agent1_losing_dice"][die_value] / agent2_wins
-            if agent2_wins > 0
-            else 0
-        )
-        averaged_stats["agent2_averaged_losing_dice"][die_value] = (
-            stats["agent2_losing_dice"][die_value] / agent1_wins
-            if agent1_wins > 0
-            else 0
-        )
-
-    return averaged_stats
 
 
 if __name__ == "__main__":
     agent1 = agents.RandomAgent()
     agent2 = agents.RandomAgent()
 
-    stats = get_matchup_statistics(agent1, agent2, num_games=100)
-    stats = add_averaged_stats(stats)
+    stats = simulate_matchup(agent1, agent2, num_games=100)
+    stats_df = stats.to_dataframe()
 
-    pprint(stats)
+    print(stats_df.describe())
